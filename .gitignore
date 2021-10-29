@@ -1,0 +1,12 @@
+bin/icon.ico
+bin/main.o
+bin/Animation.o
+bin/Entity.o
+assets/images/human_spritesheet.png
+.vscode/settings.json
+.vscode/c_cpp_properties.json
+assets/images/zombie/female_spritesheet.png
+assets/images/zombie/male_spritesheet.png
+bin/Game.o
+bin/resources.o
+include/effolkronium/random.hpp
