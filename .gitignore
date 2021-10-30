@@ -10,3 +10,5 @@ assets/images/zombie/male_spritesheet.png
 bin/Game.o
 bin/resources.o
 include/effolkronium/random.hpp
+bin/GameState.o
+bin/State.o
