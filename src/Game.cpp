@@ -35,7 +35,7 @@ Game::Game()
     m_window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     m_window.setMouseCursorVisible(false);
 
-    m_states.push(std::make_unique<GameState>(m_window, m_states, m_font, m_texts, m_textures, m_sprites, m_music, m_soundBuffers, m_sounds));
+    m_states.push(std::make_unique<MainMenuState>(m_window, m_states, m_font, m_texts, m_textures, m_sprites, m_music, m_soundBuffers, m_sounds));
 }
 
 void Game::pollEvents()
@@ -43,7 +43,7 @@ void Game::pollEvents()
     sf::Event event;
     while (m_window.pollEvent(event))
     {
-        if (event.type == sf::Event::Closed || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
+        if (event.type == sf::Event::Closed)
         {
             m_window.close();
         }

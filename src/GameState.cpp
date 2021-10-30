@@ -107,46 +107,27 @@ void GameState::_removeUselessEntities()
 
 GameState::GameState(sf::RenderWindow &p_window, std::stack<std::unique_ptr<State>> &p_states, sf::Font &p_font, Dictionary<sf::Text> &p_texts, 
     Dictionary<sf::Texture> &p_textures, Dictionary<sf::Sprite> &p_sprites, sf::Music &p_music, Dictionary<sf::SoundBuffer> &p_soundBuffers,
-    Dictionary<sf::Sound> &p_sounds) : State { p_window, p_states, p_font, p_texts, p_textures, p_sprites, p_music, p_soundBuffers, p_sounds }
+    Dictionary<sf::Sound> &p_sounds) 
+    : State { p_window, p_states, p_font, p_texts, p_textures, p_sprites, p_music, p_soundBuffers, p_sounds }
 {
-    this->loadFont("../assets/fonts/PressStart2P.ttf");
-
     m_texts["score"].setFont(m_font);
     m_texts.at("score").setCharacterSize(15);
     m_texts.at("score").setPosition(10.f, 10.f);
     m_texts.at("score").setOutlineThickness(2.f);
     m_texts.at("score").setOutlineColor(sf::Color::Black);
 
-    this->loadTexture("road", "../assets/images/road.jpg");
-    this->loadTexture("cursor", "../assets/images/cursor.png");
-    this->loadTexture("human_walk_spritesheet", "../assets/images/human_walk_spritesheet.png");
-    this->loadTexture("human_die_spritesheet", "../assets/images/human_die_spritesheet.png");
-    this->loadTexture("male_zombie_walk_spritesheet", "../assets/images/zombie/male_walk_spritesheet.png");
-    this->loadTexture("male_zombie_die_spritesheet", "../assets/images/zombie/male_die_spritesheet.png");
-    this->loadTexture("female_zombie_walk_spritesheet", "../assets/images/zombie/female_walk_spritesheet.png");
-    this->loadTexture("female_zombie_die_spritesheet", "../assets/images/zombie/female_die_spritesheet.png");
-
-    m_sprites.emplace("road", m_textures.at("road"));
-    m_sprites.emplace("cursor", m_textures.at("cursor"));
-
-    m_sprites.at("cursor").setOrigin(m_sprites.at("cursor").getTextureRect().width / 2, m_sprites.at("cursor").getTextureRect().height / 2);
-    m_sprites.at("cursor").setColor(sf::Color::Red);
-
-    this->loadSound("punch", "../assets/sounds/punch.wav", 20.f);
-    this->loadSound("dead_male_zombie", "../assets/sounds/dead_male_zombie.wav", 30.f);
-    this->loadSound("dead_female_zombie", "../assets/sounds/dead_female_zombie.wav", 30.f);
-    this->loadSound("dead_human", "../assets/sounds/dead_human.wav", 80.f);
-
-    this->openMusic("../assets/musics/background.wav");
-    m_music.setLoop(true);
-    m_music.play();
-
     this->_addEntity();
+
+    m_music.play();
 }
 
 void GameState::checkEvents(sf::Event &p_event)
 {
-    if (p_event.type == sf::Event::MouseButtonPressed && p_event.mouseButton.button == sf::Mouse::Left)
+    if (p_event.type == sf::Event::KeyPressed && p_event.key.code == sf::Keyboard::Escape)
+    {
+        m_states.pop();
+    }
+    else if (p_event.type == sf::Event::MouseButtonPressed && p_event.mouseButton.button == sf::Mouse::Left)
     {
         for (auto &entity : m_entities)
         {

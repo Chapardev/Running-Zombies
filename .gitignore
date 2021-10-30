@@ -12,3 +12,5 @@ bin/resources.o
 include/effolkronium/random.hpp
 bin/GameState.o
 bin/State.o
+bin/MainMenuState.o
+bin/Button.o

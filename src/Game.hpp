@@ -3,7 +3,7 @@
 
 #include "Entity.hpp"
 
-#include "GameState.hpp"
+#include "MainMenuState.hpp"
 
 class Game
 {
