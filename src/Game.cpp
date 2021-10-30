@@ -260,10 +260,11 @@ void Game::draw()
     m_window.clear();
 
     m_window.draw(m_sprites.at("road"));
-
-    for (const auto &entity : m_entities)
+    
+    // I use reverse iterators so that the last zombies walking won't be at the foreground in relation to the first ones
+    for (auto it { m_entities.rbegin() }; it != m_entities.rend(); ++it)
     {
-        m_window.draw(*entity);
+        m_window.draw(*(*it));
     }
 
     m_window.draw(m_sprites.at("cursor"));
