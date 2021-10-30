@@ -10,7 +10,12 @@
 class GameState : public State
 {
 private:
+    void _setEntityCharacteritics(int p_randomValue, std::string &p_walkPath, std::string &p_diePath, int &p_score);
+    void _createEntitySprites(const std::string &p_walkPath, const std::string &p_diePath);
     void _addEntity();
+
+    // Removes entities who are dead or out of the screen
+    void _removeUselessEntities();
 
 public:
     GameState(sf::RenderWindow &p_window, std::stack<std::unique_ptr<State>> &p_states, sf::Font &p_font, Dictionary<sf::Text> &p_texts, 

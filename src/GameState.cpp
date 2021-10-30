@@ -5,50 +5,57 @@
 
 using Random = effolkronium::random_static;
 
-void GameState::_addEntity()
+void GameState::_setEntityCharacteritics(int p_randomValue, std::string &p_walkPath, std::string &p_diePath, int &p_score)
 {
-    const int randomValue { Random::get(1, 100) };
-
-    std::string walkPath {  };
-    std::string diePath {  };
-    int score {  };
-
-    if (randomValue <= 70)
+    if (p_randomValue <= 70)
     {
         // Male zombie
-        walkPath = "male_zombie_walk";
-        diePath = "male_zombie_die";
-        score = 1;
+        p_walkPath = "male_zombie_walk";
+        p_diePath = "male_zombie_die";
+        p_score = 1;
     }
-    else if (randomValue <= 90)
+    else if (p_randomValue <= 90)
     {
         // Female zombie
-        walkPath = "female_zombie_walk";
-        diePath = "female_zombie_die";
-        score = 5;
+        p_walkPath = "female_zombie_walk";
+        p_diePath = "female_zombie_die";
+        p_score = 5;
     }
     else
     {
         // Human
-        walkPath = "human_walk";
-        diePath = "human_die";
-        score = -10;
+        p_walkPath = "human_walk";
+        p_diePath = "human_die";
+        p_score = -10;
     }
+}
 
-    m_sprites.emplace(walkPath + std::to_string(m_numberOfEntities), m_textures.at(walkPath + "_spritesheet"));
-    m_sprites.at(walkPath + std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
-    m_sprites.emplace(diePath + std::to_string(m_numberOfEntities), m_textures.at(diePath + "_spritesheet"));
-    m_sprites.at(diePath + std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
+void GameState::_createEntitySprites(const std::string &p_walkPath, const std::string &p_diePath)
+{
+    m_sprites.emplace(p_walkPath + std::to_string(m_numberOfEntities), m_textures.at(p_walkPath + "_spritesheet"));
+    m_sprites.at(p_walkPath + std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
+    m_sprites.emplace(p_diePath + std::to_string(m_numberOfEntities), m_textures.at(p_diePath + "_spritesheet"));
+    m_sprites.at(p_diePath + std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
 
     m_animatedSprites.push_back(
-        std::make_unique<AnimatedSprite>(m_sprites.at(walkPath + std::to_string(m_numberOfEntities)), 0.05f, 10, true)
+        std::make_unique<AnimatedSprite>(m_sprites.at(p_walkPath + std::to_string(m_numberOfEntities)), 0.05f, 10, true)
     );
 
     m_animatedSprites.push_back(
         std::make_unique<AnimatedSprite>(
-            m_sprites.at(diePath + std::to_string(m_numberOfEntities)), 0.05f, (boost::algorithm::contains(diePath, "zombie") ? 12 : 10)
+            m_sprites.at(p_diePath + std::to_string(m_numberOfEntities)), 0.05f, (boost::algorithm::contains(p_diePath, "zombie") ? 12 : 10)
         )
     );
+}
+
+void GameState::_addEntity()
+{
+    std::string walkPath;
+    std::string diePath;
+    int score {  };
+
+    this->_setEntityCharacteritics(Random::get(1, 100), walkPath, diePath, score);
+    this->_createEntitySprites(walkPath, diePath);
 
     m_entities.push_back(
         std::make_unique<Entity>(
@@ -61,6 +68,41 @@ void GameState::_addEntity()
     );
 
     ++m_numberOfEntities;
+}
+
+void GameState::_removeUselessEntities()
+{
+    for (auto &entity : m_entities)
+    {
+        if (entity->isDead() || entity->isOutOfBounds())
+        {
+            if (m_sprites.find("male_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
+            {
+                m_sprites.erase("male_zombie_walk" + std::to_string(entity->getId()));
+                m_sprites.erase("male_zombie_die" + std::to_string(entity->getId()));
+            }
+            else if (m_sprites.find("female_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
+            {
+                m_sprites.erase("female_zombie_walk" + std::to_string(entity->getId()));
+                m_sprites.erase("female_zombie_die" + std::to_string(entity->getId()));
+            }
+            else
+            {
+                m_sprites.erase("human_walk" + std::to_string(entity->getId()));
+                m_sprites.erase("human_die" + std::to_string(entity->getId()));
+            }
+
+            // Erases walk and die animations of the entity
+            m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId());
+            m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId() + 1);
+        }
+    }
+
+    // Removes all dead/out zombies from the vector (from first dead/out to last dead/out)
+    m_entities.erase(
+        std::remove_if(m_entities.begin(), m_entities.end(), [](const auto &entity) { return entity->isDead() || entity->isOutOfBounds(); }),
+        m_entities.end()
+    );
 }
 
 GameState::GameState(sf::RenderWindow &p_window, std::stack<std::unique_ptr<State>> &p_states, sf::Font &p_font, Dictionary<sf::Text> &p_texts, 
@@ -138,37 +180,7 @@ void GameState::update()
         m_apparitionClock.restart();
     }
 
-    for (auto &entity : m_entities)
-    {
-        if (entity->isDead() || entity->isOutOfBounds())
-        {
-            if (m_sprites.find("male_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
-            {
-                m_sprites.erase("male_zombie_walk" + std::to_string(entity->getId()));
-                m_sprites.erase("male_zombie_die" + std::to_string(entity->getId()));
-            }
-            else if (m_sprites.find("female_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
-            {
-                m_sprites.erase("female_zombie_walk" + std::to_string(entity->getId()));
-                m_sprites.erase("female_zombie_die" + std::to_string(entity->getId()));
-            }
-            else
-            {
-                m_sprites.erase("human_walk" + std::to_string(entity->getId()));
-                m_sprites.erase("human_die" + std::to_string(entity->getId()));
-            }
-
-            // Erases walk and die animations of the entity
-            m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId());
-            m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId() + 1);
-        }
-    }
-
-    // Removes all dead/out zombies from the vector (from first dead/out to last dead/out)
-    m_entities.erase(
-        std::remove_if(m_entities.begin(), m_entities.end(), [](const auto &entity) { return entity->isDead() || entity->isOutOfBounds(); }),
-        m_entities.end()
-    );
+    this->_removeUselessEntities();
 
     for (auto &entity : m_entities)
     {
