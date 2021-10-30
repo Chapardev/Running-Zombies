@@ -132,9 +132,10 @@ GameState::GameState(sf::RenderWindow &p_window, std::stack<std::unique_ptr<Stat
     m_sprites.at("cursor").setOrigin(m_sprites.at("cursor").getTextureRect().width / 2, m_sprites.at("cursor").getTextureRect().height / 2);
     m_sprites.at("cursor").setColor(sf::Color::Red);
 
-    this->loadSoundBuffer("punch", "../assets/sounds/punch.wav");
-    m_sounds["punch"].setBuffer(m_soundBuffers.at("punch"));
-    m_sounds.at("punch").setVolume(30.f);
+    this->loadSound("punch", "../assets/sounds/punch.wav", 20.f);
+    this->loadSound("dead_male_zombie", "../assets/sounds/dead_male_zombie.wav", 30.f);
+    this->loadSound("dead_female_zombie", "../assets/sounds/dead_female_zombie.wav", 30.f);
+    this->loadSound("dead_human", "../assets/sounds/dead_human.wav", 80.f);
 
     this->openMusic("../assets/musics/background.wav");
     m_music.setLoop(true);
@@ -156,6 +157,19 @@ void GameState::checkEvents(sf::Event &p_event)
                 
                 m_sounds.at("punch").setPitch(Random::get(0.5f, 1.f));
                 m_sounds.at("punch").play();
+
+                if (m_sprites.find("male_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
+                {
+                    m_sounds.at("dead_male_zombie").play();
+                }
+                else if (m_sprites.find("female_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
+                {
+                    m_sounds.at("dead_female_zombie").play();
+                }
+                else
+                {
+                    m_sounds.at("dead_human").play();
+                }
             }
         }
     }

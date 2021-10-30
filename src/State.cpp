@@ -16,12 +16,14 @@ void State::loadFont(const std::string &p_fileName)
     }
 }
 
-void State::loadSoundBuffer(const std::string &p_keyName, const std::string &p_fileName)
+void State::loadSound(const std::string &p_keyName, const std::string &p_fileName, float p_volume)
 {
     if (!m_soundBuffers[p_keyName].loadFromFile(p_fileName))
     {
         throw "Unable to load \"" + p_keyName + "\" sound (path: \"" + p_fileName + "\")";
     }
+    m_sounds[p_keyName].setBuffer(m_soundBuffers.at(p_keyName));
+    m_sounds.at(p_keyName).setVolume(p_volume);
 }
 
 void State::openMusic(const std::string &p_fileName)

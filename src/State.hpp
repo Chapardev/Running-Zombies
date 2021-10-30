@@ -17,7 +17,7 @@ class State
 protected:
     void loadTexture(const std::string &p_keyName, const std::string &p_fileName);
     void loadFont(const std::string &p_fileName);
-    void loadSoundBuffer(const std::string &p_keyName, const std::string &p_fileName);
+    void loadSound(const std::string &p_keyName, const std::string &p_fileName, float p_volume=100.f);
     void openMusic(const std::string &p_fileName);
 
 public:
