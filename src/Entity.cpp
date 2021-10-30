@@ -2,35 +2,34 @@
 
 #include <effolkronium/random.hpp>
 
-void Entity::_addFrames(Animation &p_animation, sf::Sprite &p_sprite, int p_numberOfFrames)
+void Entity::_addFrames(AnimatedSprite &p_sprite)
 {
-    const int frameWidth { p_sprite.getTextureRect().width / p_numberOfFrames };
-    for (int i { 0 }; i < p_numberOfFrames; ++i)
+    const int frameWidth { p_sprite.sprite.getTextureRect().width / p_sprite.numberOfFrames };
+    for (int i { 0 }; i < p_sprite.numberOfFrames; ++i)
     {
-        p_animation.addFrame({ frameWidth * i, 0, frameWidth, p_sprite.getTextureRect().height });
+        p_sprite.animation.addFrame({ frameWidth * i, 0, frameWidth, p_sprite.sprite.getTextureRect().height });
     }
 }
 
 Entity::Entity(const sf::RenderWindow &p_window, const AnimatedSprite &p_spriteWalk, const AnimatedSprite &p_spriteDie, std::size_t p_id, int p_score)
-    : m_window { p_window }, m_spriteWalk { p_spriteWalk.sprite }, m_spriteDie { p_spriteDie.sprite }, 
-      m_animationWalk { m_spriteWalk, p_spriteWalk.frameOffset, true }, m_animationDie { m_spriteDie, p_spriteDie.frameOffset }, m_id { p_id },
+    : m_window { p_window }, m_walk { p_spriteWalk }, m_die { p_spriteDie }, m_id { p_id },
       m_score { p_score }
 {
     using Random = effolkronium::random_static;
-    m_spriteWalk.setPosition(
+    m_walk.sprite.setPosition(
         Random::get<unsigned int>(
-            0u, p_window.getSize().x - m_spriteWalk.getGlobalBounds().width / p_spriteWalk.numberOfFrames
+            0u, p_window.getSize().x - m_walk.sprite.getGlobalBounds().width / m_walk.numberOfFrames
         ),
-        -m_spriteWalk.getTextureRect().height * m_spriteWalk.getScale().y
+        -m_walk.sprite.getTextureRect().height * m_walk.sprite.getScale().y
     );
 
-    this->_addFrames(m_animationWalk, m_spriteWalk, p_spriteWalk.numberOfFrames);
-    this->_addFrames(m_animationDie, m_spriteDie, p_spriteDie.numberOfFrames);
+    this->_addFrames(m_walk);
+    this->_addFrames(m_die);
 }
 
 void Entity::changeAnimation()
 {
-    m_spriteDie.setPosition(m_spriteWalk.getPosition());
+    m_die.sprite.setPosition(m_walk.sprite.getPosition());
     m_animationChanged = true;
     m_deathClock.restart();
 }
@@ -39,16 +38,16 @@ void Entity::update(float p_dt)
 {
     if (!m_animationChanged)
     {
-        m_spriteWalk.move(0.f, m_speed * p_dt);
-        m_animationWalk.update();
+        m_walk.sprite.move(0.f, m_speed * p_dt);
+        m_walk.animation.update();
     }
     else if (!this->isDead())
     {
-        m_animationDie.update();
+        m_die.animation.update();
     }
 }
 
 void Entity::draw(sf::RenderTarget &p_target, sf::RenderStates p_states) const
 {
-    p_target.draw((!m_animationChanged ? m_spriteWalk : m_spriteDie), p_states);
+    p_target.draw((!m_animationChanged ? m_walk.sprite : m_die.sprite), p_states);
 }

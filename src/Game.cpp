@@ -106,7 +106,10 @@ void Game::_addEntity()
     m_sprites.emplace(diePath + std::to_string(m_numberOfEntities), m_textures.at(diePath + "_spritesheet"));
     m_sprites.at(diePath + std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
 
-    m_animatedSprites.push_back(std::make_unique<AnimatedSprite>(m_sprites.at(walkPath + std::to_string(m_numberOfEntities)), 0.05f, 10));
+    m_animatedSprites.push_back(
+        std::make_unique<AnimatedSprite>(m_sprites.at(walkPath + std::to_string(m_numberOfEntities)), 0.05f, 10, true)
+    );
+
     m_animatedSprites.push_back(
         std::make_unique<AnimatedSprite>(
             m_sprites.at(diePath + std::to_string(m_numberOfEntities)), 0.05f, (boost::algorithm::contains(diePath, "zombie") ? 12 : 10)

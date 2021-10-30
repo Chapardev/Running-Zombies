@@ -10,7 +10,7 @@ class Animation
 public:
     Animation(sf::Sprite &p_target, float p_frameOffset, bool p_loop=false);
 
-    sf::Time getAnimationLength() const noexcept
+    sf::Time getLength() const noexcept
     {
         return m_frameOffset * static_cast<float>(m_frames.size());
     }

@@ -5,28 +5,37 @@
 
 struct AnimatedSprite
 {
-    AnimatedSprite(sf::Sprite &p_sprite, float p_frameOffset, int p_numberOfFrames)
-        : sprite { p_sprite }, frameOffset { p_frameOffset }, numberOfFrames { p_numberOfFrames }
+    AnimatedSprite(sf::Sprite &p_sprite, float p_frameOffset, int p_numberOfFrames, bool p_loop=false)
+        : sprite { p_sprite }, frameOffset { p_frameOffset }, numberOfFrames { p_numberOfFrames }, loop { p_loop }, 
+          animation { p_sprite, p_frameOffset, p_loop }
     {
+        
+    }   
 
+    AnimatedSprite(const AnimatedSprite &p_other)
+        : AnimatedSprite { p_other.sprite, p_other.frameOffset, p_other.numberOfFrames, p_other.loop }
+    {
+        
     }
 
     sf::Sprite &sprite;
     float frameOffset;
     int numberOfFrames;
+    bool loop;
+    Animation animation;
 };
 
 class Entity : public sf::Drawable
 {
 private:
-    void _addFrames(Animation &p_animation, sf::Sprite &p_sprite, int p_numberOfFrames);
+    void _addFrames(AnimatedSprite &p_sprite);
 
 public:
     Entity(const sf::RenderWindow &p_window, const AnimatedSprite &p_spriteWalk, const AnimatedSprite &p_spriteDie, std::size_t p_id, int p_score);
 
     bool isTargeted(float p_mousePosX, float p_mousePosY) const noexcept
     {
-        return m_spriteWalk.getGlobalBounds().contains(p_mousePosX, p_mousePosY);
+        return m_walk.sprite.getGlobalBounds().contains(p_mousePosX, p_mousePosY);
     }
 
     bool animationChanged() const noexcept
@@ -36,12 +45,12 @@ public:
 
     bool isDead() const noexcept
     {
-        return m_animationChanged && m_deathClock.getElapsedTime() > m_animationDie.getAnimationLength();
+        return m_animationChanged && m_deathClock.getElapsedTime() > m_die.animation.getLength();
     }
 
     bool isOutOfBounds() const noexcept
     {
-        return m_spriteWalk.getGlobalBounds().top > m_window.getSize().y;
+        return m_walk.sprite.getGlobalBounds().top > m_window.getSize().y;
     }
 
     int getScore() const noexcept { return m_score; }
@@ -55,11 +64,8 @@ public:
 protected:
     const sf::RenderWindow &m_window;
 
-    sf::Sprite &m_spriteWalk;
-    sf::Sprite &m_spriteDie;
-
-    Animation m_animationWalk;
-    Animation m_animationDie;
+    AnimatedSprite m_walk;
+    AnimatedSprite m_die;
 
     // Enables to calculate time elapsed before corpse disappears
     sf::Clock m_deathClock;
