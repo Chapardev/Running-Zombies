@@ -50,8 +50,7 @@ private:
 
     Dictionary<sf::Texture> m_textures;
     Dictionary<sf::Sprite> m_sprites;
-
-    std::vector<std::unique_ptr<AnimatedSprite>> m_animatedZombieSprites;
+    std::vector<std::unique_ptr<AnimatedSprite>> m_animatedSprites;
 
     sf::Music m_music;
     Dictionary<sf::SoundBuffer> m_soundBuffers;

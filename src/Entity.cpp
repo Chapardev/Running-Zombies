@@ -19,7 +19,7 @@ Entity::Entity(const sf::RenderWindow &p_window, const AnimatedSprite &p_spriteW
     using Random = effolkronium::random_static;
     m_spriteWalk.setPosition(
         Random::get<unsigned int>(
-            0u, p_window.getSize().x - (m_spriteWalk.getTextureRect().width * m_spriteWalk.getScale().x) / p_spriteWalk.numberOfFrames
+            0u, p_window.getSize().x - m_spriteWalk.getGlobalBounds().width / p_spriteWalk.numberOfFrames
         ),
         -m_spriteWalk.getTextureRect().height * m_spriteWalk.getScale().y
     );

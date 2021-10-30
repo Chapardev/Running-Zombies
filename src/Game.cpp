@@ -4,6 +4,7 @@
 #include <effolkronium/random.hpp>
 
 #include <fstream>
+#include <iostream>
 
 using Random = effolkronium::random_static;
 
@@ -105,8 +106,8 @@ void Game::_addEntity()
     m_sprites.emplace(diePath + std::to_string(m_numberOfEntities), m_textures.at(diePath + "_spritesheet"));
     m_sprites.at(diePath + std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
 
-    m_animatedZombieSprites.push_back(std::make_unique<AnimatedSprite>(m_sprites.at(walkPath + std::to_string(m_numberOfEntities)), 0.05f, 10));
-    m_animatedZombieSprites.push_back(
+    m_animatedSprites.push_back(std::make_unique<AnimatedSprite>(m_sprites.at(walkPath + std::to_string(m_numberOfEntities)), 0.05f, 10));
+    m_animatedSprites.push_back(
         std::make_unique<AnimatedSprite>(
             m_sprites.at(diePath + std::to_string(m_numberOfEntities)), 0.05f, (boost::algorithm::contains(diePath, "zombie") ? 12 : 10)
         )
@@ -115,8 +116,8 @@ void Game::_addEntity()
     m_entities.push_back(
         std::make_unique<Entity>(
             m_window,
-            *(m_animatedZombieSprites[m_animatedZombieSprites.size()-2]),
-            *(m_animatedZombieSprites.back()),
+            *(m_animatedSprites[m_animatedSprites.size()-2]),
+            *(m_animatedSprites.back()),
             m_numberOfEntities,
             score
         )
@@ -218,9 +219,25 @@ void Game::update()
     {
         if (entity->isDead() || entity->isOutOfBounds())
         {
-            m_sprites.erase("zombie_walk" + std::to_string(entity->getId()));
-            m_sprites.erase("zombie_die" + std::to_string(entity->getId()));
-            m_animatedZombieSprites.erase(m_animatedZombieSprites.begin() + entity->getId());
+            if (m_sprites.find("male_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
+            {
+                m_sprites.erase("male_zombie_walk" + std::to_string(entity->getId()));
+                m_sprites.erase("male_zombie_die" + std::to_string(entity->getId()));
+            }
+            else if (m_sprites.find("female_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
+            {
+                m_sprites.erase("female_zombie_walk" + std::to_string(entity->getId()));
+                m_sprites.erase("female_zombie_die" + std::to_string(entity->getId()));
+            }
+            else
+            {
+                m_sprites.erase("human_walk" + std::to_string(entity->getId()));
+                m_sprites.erase("human_die" + std::to_string(entity->getId()));
+            }
+
+            // Erases walk and die animations of the entity
+            m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId());
+            m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId() + 1);
         }
     }
 
