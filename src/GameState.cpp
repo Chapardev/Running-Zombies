@@ -94,7 +94,7 @@ void GameState::_removeUselessEntities()
 
             // Erases walk and die animations of the entity
             m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId());
-            m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId() + 1);
+            m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId());
         }
     }
 
@@ -105,19 +105,40 @@ void GameState::_removeUselessEntities()
     );
 }
 
+void GameState::_playSound(const std::string &p_keyName, float p_minValue)
+{
+    m_sounds.at(p_keyName).play();
+    m_sounds.at(p_keyName).setPitch(Random::get(p_minValue, 1.f));
+}
+
+void GameState::_playEntityDeathSound(const Entity &p_entity)
+{
+    if (m_sprites.find("male_zombie_walk" + std::to_string(p_entity.getId())) != m_sprites.end())
+    {
+        this->_playSound("dead_male_zombie", 0.75f);
+    }
+    else if (m_sprites.find("female_zombie_walk" + std::to_string(p_entity.getId())) != m_sprites.end())
+    {
+        this->_playSound("dead_female_zombie", 0.75f);
+    }
+    else
+    {
+        this->_playSound("dead_human", 0.75f);
+    }
+}
+
 GameState::GameState(sf::RenderWindow &p_window, std::stack<std::unique_ptr<State>> &p_states, sf::Font &p_font, Dictionary<sf::Text> &p_texts, 
     Dictionary<sf::Texture> &p_textures, Dictionary<sf::Sprite> &p_sprites, sf::Music &p_music, Dictionary<sf::SoundBuffer> &p_soundBuffers,
     Dictionary<sf::Sound> &p_sounds) 
     : State { p_window, p_states, p_font, p_texts, p_textures, p_sprites, p_music, p_soundBuffers, p_sounds }
 {
-    m_texts["score"].setFont(m_font);
-    m_texts.at("score").setCharacterSize(15);
-    m_texts.at("score").setPosition(10.f, 10.f);
-    m_texts.at("score").setOutlineThickness(2.f);
-    m_texts.at("score").setOutlineColor(sf::Color::Black);
-
+    static bool createdOnce { false };
+    if (!createdOnce)
+    {
+        this->createText("score", "", 10.f, 10.f, 20);
+        createdOnce = true;
+    } 
     this->_addEntity();
-
     m_music.play();
 }
 
@@ -125,6 +146,15 @@ void GameState::checkEvents(sf::Event &p_event)
 {
     if (p_event.type == sf::Event::KeyPressed && p_event.key.code == sf::Keyboard::Escape)
     {
+        for (auto &pair : m_sounds)
+        {
+            if (pair.second.getStatus() == sf::Sound::Playing)
+            {
+                pair.second.stop();
+            }
+        }
+
+        m_music.stop();
         m_states.pop();
     }
     else if (p_event.type == sf::Event::MouseButtonPressed && p_event.mouseButton.button == sf::Mouse::Left)
@@ -136,21 +166,8 @@ void GameState::checkEvents(sf::Event &p_event)
                 entity->changeAnimation();
                 m_score += entity->getScore();
                 
-                m_sounds.at("punch").setPitch(Random::get(0.5f, 1.f));
-                m_sounds.at("punch").play();
-
-                if (m_sprites.find("male_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
-                {
-                    m_sounds.at("dead_male_zombie").play();
-                }
-                else if (m_sprites.find("female_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
-                {
-                    m_sounds.at("dead_female_zombie").play();
-                }
-                else
-                {
-                    m_sounds.at("dead_human").play();
-                }
+                this->_playSound("punch", 0.5f);
+                this->_playEntityDeathSound(*entity);
             }
         }
     }
@@ -159,6 +176,7 @@ void GameState::checkEvents(sf::Event &p_event)
 void GameState::update()
 {
     m_dt = m_dtClock.restart().asSeconds();
+    m_sprites.at("cursor").setPosition(sf::Vector2f { sf::Mouse::getPosition(m_window) });
 
     if (m_score < 0)
     {
@@ -166,7 +184,6 @@ void GameState::update()
     }
 
     m_texts.at("score").setString("SCORE: " + std::to_string(m_score));
-    m_sprites.at("cursor").setPosition(sf::Vector2f { sf::Mouse::getPosition(m_window) });
 
     if (m_apparitionClock.getElapsedTime() > m_apparitionTime)
     {

@@ -14,6 +14,11 @@ public:
     {
         return m_frameOffset * static_cast<float>(m_frames.size());
     }
+
+    bool isOver() const noexcept
+    {
+        return m_currentFrame == m_frames.size() - 1;
+    }
     
     void addFrame(const sf::IntRect &p_frame);
     void update();

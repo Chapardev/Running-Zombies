@@ -16,6 +16,9 @@ private:
 
     // Removes entities who are dead or out of the screen
     void _removeUselessEntities();
+    void _updateAudio();
+    void _playSound(const std::string &p_keyName, float p_minValue);
+    void _playEntityDeathSound(const Entity &p_entity);
 
 public:
     GameState(sf::RenderWindow &p_window, std::stack<std::unique_ptr<State>> &p_states, sf::Font &p_font, Dictionary<sf::Text> &p_texts, 

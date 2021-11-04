@@ -45,7 +45,7 @@ public:
 
     bool isDead() const noexcept
     {
-        return m_animationChanged && m_deathClock.getElapsedTime() > m_die.animation.getLength();
+        return m_animationChanged && m_die.animation.isOver() && m_deathClock.getElapsedTime() > m_die.animation.getLength();
     }
 
     bool isOutOfBounds() const noexcept

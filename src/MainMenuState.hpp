@@ -3,8 +3,6 @@
 
 #include "State.hpp"
 
-#include "Button.hpp"
-
 class MainMenuState : public State
 {
 public:
@@ -17,7 +15,8 @@ public:
     void draw() override;
 
 private:
-    Button m_button;
+    const sf::Time m_blinkTime { sf::seconds(0.5f) };
+    sf::Clock m_blinkClock;
 };
 
 #endif // SRC_MAIN_MENU_STATE_HPP

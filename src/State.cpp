@@ -34,6 +34,16 @@ void State::openMusic(const std::string &p_fileName)
     }
 }
 
+void State::createText(const std::string &p_keyName, const std::string &p_string, float p_x, float p_y, int p_size)
+{
+    m_texts[p_keyName].setFont(m_font);
+    m_texts.at(p_keyName).setString(p_string);
+    m_texts.at(p_keyName).setCharacterSize(p_size);
+    m_texts.at(p_keyName).setOutlineThickness(2.f);
+    m_texts.at(p_keyName).setOutlineColor(sf::Color::Black);
+    m_texts.at(p_keyName).setPosition(p_x, p_y);
+}
+
 State::State(sf::RenderWindow &p_window, std::stack<std::unique_ptr<State>> &p_states, sf::Font &p_font, Dictionary<sf::Text> &p_texts, 
         Dictionary<sf::Texture> &p_textures, Dictionary<sf::Sprite> &p_sprites, sf::Music &p_music, Dictionary<sf::SoundBuffer> &p_soundBuffers,
         Dictionary<sf::Sound> &p_sounds)
