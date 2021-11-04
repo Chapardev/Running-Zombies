@@ -146,16 +146,7 @@ void GameState::checkEvents(sf::Event &p_event)
 {
     if (p_event.type == sf::Event::KeyPressed && p_event.key.code == sf::Keyboard::Escape)
     {
-        for (auto &pair : m_sounds)
-        {
-            if (pair.second.getStatus() == sf::Sound::Playing)
-            {
-                pair.second.stop();
-            }
-        }
-
-        m_music.stop();
-        m_states.pop();
+        m_window.close();
     }
     else if (p_event.type == sf::Event::MouseButtonPressed && p_event.mouseButton.button == sf::Mouse::Left)
     {
