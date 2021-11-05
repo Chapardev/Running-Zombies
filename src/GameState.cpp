@@ -5,67 +5,65 @@
 
 using Random = effolkronium::random_static;
 
-void GameState::_setEntityCharacteritics(int p_randomValue, std::string &p_walkPath, std::string &p_diePath, int &p_score)
+void GameState::_setEntityCharacteritics(int p_randomValue, std::string &p_path, sf::IntRect &p_walkRect, sf::IntRect &p_dieRect, int &p_score)
 {
     if (p_randomValue <= 70)
     {
         // Male zombie
-        p_walkPath = "male_zombie_walk";
-        p_diePath = "male_zombie_die";
+        p_path = "male_zombie";
+        p_walkRect = { 0, 0, 430, 519 };
+        p_dieRect = { 0, 519, 629, 526 };
         p_score = 1;
     }
     else if (p_randomValue <= 90)
     {
         // Female zombie
-        p_walkPath = "female_zombie_walk";
-        p_diePath = "female_zombie_die";
+        p_path = "female_zombie";
+        p_walkRect = { 0, 1045, 521, 576 };
+        p_dieRect = { 0, 1045 + 576, 684, 627 };
         p_score = 5;
     }
     else
     {
         // Human
-        p_walkPath = "human_walk";
-        p_diePath = "human_die";
+        p_path = "human";
+        p_walkRect = { 0, 2248, 415, 507 };
+        p_dieRect = { 0, 2248 + 507, 588, 600 };
         p_score = -10;
     }
 }
 
-void GameState::_createEntitySprites(const std::string &p_walkPath, const std::string &p_diePath)
+void GameState::_createEntitySprites(const std::string &p_path, const sf::IntRect &p_walkRect, const sf::IntRect &p_dieRect)
 {
-    m_sprites.emplace(p_walkPath + std::to_string(m_numberOfEntities), m_textures.at(p_walkPath + "_spritesheet"));
-    m_sprites.at(p_walkPath + std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
-    m_sprites.emplace(p_diePath + std::to_string(m_numberOfEntities), m_textures.at(p_diePath + "_spritesheet"));
-    m_sprites.at(p_diePath + std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
+    m_sprites.emplace(std::to_string(m_numberOfEntities), m_textures.at("spritesheet"));
+    m_sprites.at(std::to_string(m_numberOfEntities)).setScale(0.25f, 0.25f);
+    m_sprites.emplace(std::to_string(m_numberOfEntities) + "die", m_textures.at("spritesheet"));
+    m_sprites.at(std::to_string(m_numberOfEntities) + "die").setScale(0.25f, 0.25f);
 
     m_animatedSprites.push_back(
-        std::make_unique<AnimatedSprite>(m_sprites.at(p_walkPath + std::to_string(m_numberOfEntities)), 0.05f, 10, true)
+        std::make_unique<AnimatedSprite>(m_sprites.at(std::to_string(m_numberOfEntities)), p_walkRect, 0.05f, 10, true)
     );
 
     m_animatedSprites.push_back(
         std::make_unique<AnimatedSprite>(
-            m_sprites.at(p_diePath + std::to_string(m_numberOfEntities)), 0.05f, (boost::algorithm::contains(p_diePath, "zombie") ? 12 : 10)
+            m_sprites.at(std::to_string(m_numberOfEntities) + "die"), p_dieRect, 0.05f, (boost::algorithm::contains(p_path, "zombie") ? 12 : 10)
         )
     );
 }
 
 void GameState::_addEntity()
 {
-    std::string walkPath;
-    std::string diePath;
+    std::string path;
+    sf::IntRect walkRect;
+    sf::IntRect dieRect;
     int score {  };
 
-    this->_setEntityCharacteritics(Random::get(1, 100), walkPath, diePath, score);
-    this->_createEntitySprites(walkPath, diePath);
+    this->_setEntityCharacteritics(Random::get(1, 100), path, walkRect, dieRect, score);
+    this->_createEntitySprites(path, walkRect, dieRect);
 
-    m_entities.push_back(
-        std::make_unique<Entity>(
-            m_window,
-            *(m_animatedSprites[m_animatedSprites.size()-2]),
-            *(m_animatedSprites.back()),
-            m_numberOfEntities,
-            score
-        )
-    );
+    m_entities.push_back(std::make_unique<Entity>(m_window, m_numberOfEntities, score));
+    m_entities.back()->addAnimatedSprite("walk", *m_animatedSprites[m_animatedSprites.size()-2]);
+    m_entities.back()->addAnimatedSprite("die", *m_animatedSprites.back());
 
     ++m_numberOfEntities;
 }
@@ -76,21 +74,8 @@ void GameState::_removeUselessEntities()
     {
         if (entity->isDead() || entity->isOutOfBounds())
         {
-            if (m_sprites.find("male_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
-            {
-                m_sprites.erase("male_zombie_walk" + std::to_string(entity->getId()));
-                m_sprites.erase("male_zombie_die" + std::to_string(entity->getId()));
-            }
-            else if (m_sprites.find("female_zombie_walk" + std::to_string(entity->getId())) != m_sprites.end())
-            {
-                m_sprites.erase("female_zombie_walk" + std::to_string(entity->getId()));
-                m_sprites.erase("female_zombie_die" + std::to_string(entity->getId()));
-            }
-            else
-            {
-                m_sprites.erase("human_walk" + std::to_string(entity->getId()));
-                m_sprites.erase("human_die" + std::to_string(entity->getId()));
-            }
+            m_sprites.erase(std::to_string(entity->getId()));
+            m_sprites.erase(std::to_string(entity->getId()) + "die");
 
             // Erases walk and die animations of the entity
             m_animatedSprites.erase(m_animatedSprites.begin() + entity->getId());
@@ -113,18 +98,18 @@ void GameState::_playSound(const std::string &p_keyName, float p_minValue)
 
 void GameState::_playEntityDeathSound(const Entity &p_entity)
 {
-    if (m_sprites.find("male_zombie_walk" + std::to_string(p_entity.getId())) != m_sprites.end())
-    {
-        this->_playSound("dead_male_zombie", 0.75f);
-    }
-    else if (m_sprites.find("female_zombie_walk" + std::to_string(p_entity.getId())) != m_sprites.end())
-    {
-        this->_playSound("dead_female_zombie", 0.75f);
-    }
-    else
-    {
-        this->_playSound("dead_human", 0.75f);
-    }
+    // if (m_sprites.find("male_zombie_walk" + std::to_string(p_entity.getId())) != m_sprites.end())
+    // {
+    //     this->_playSound("dead_male_zombie", 0.75f);
+    // }
+    // else if (m_sprites.find("female_zombie_walk" + std::to_string(p_entity.getId())) != m_sprites.end())
+    // {
+    //     this->_playSound("dead_female_zombie", 0.75f);
+    // }
+    // else
+    // {
+    //     this->_playSound("dead_human", 0.75f);
+    // }
 }
 
 GameState::GameState(sf::RenderWindow &p_window, std::stack<std::unique_ptr<State>> &p_states, sf::Font &p_font, Dictionary<sf::Text> &p_texts, 
@@ -136,8 +121,14 @@ GameState::GameState(sf::RenderWindow &p_window, std::stack<std::unique_ptr<Stat
     if (!createdOnce)
     {
         this->createText("score", "", 10.f, 10.f, 20);
+
+        this->createText("begin", "HERE WE GO!", 10.f, 10.f);
+        m_texts.at("begin").setPosition(
+            (m_window.getSize().x - m_texts.at("begin").getGlobalBounds().width) / 2.f,
+            (m_window.getSize().y - m_texts.at("begin").getGlobalBounds().height)  * 0.75f
+        );
         createdOnce = true;
-    } 
+    }
     this->_addEntity();
     m_music.play();
 }
@@ -158,7 +149,7 @@ void GameState::checkEvents(sf::Event &p_event)
                 m_score += entity->getScore();
                 
                 this->_playSound("punch", 0.5f);
-                this->_playEntityDeathSound(*entity);
+                // this->_playEntityDeathSound(*entity);
             }
         }
     }
@@ -204,4 +195,9 @@ void GameState::draw()
     m_window.draw(m_sprites.at("cursor"));
 
     m_window.draw(m_texts.at("score"));
+
+    if (m_clock.getElapsedTime().asSeconds() < 3.f)
+    {
+        m_window.draw(m_texts.at("begin"));
+    }
 }

@@ -8,18 +8,7 @@ MainMenuState::MainMenuState(sf::RenderWindow &p_window, std::stack<std::unique_
     : State { p_window, p_states, p_font, p_texts, p_textures, p_sprites, p_music, p_soundBuffers, p_sounds }
 {
     this->loadFont("../assets/fonts/PressStart2P.ttf");
-
-    this->loadTexture("road", "../assets/images/road.jpg");
-    this->loadTexture("cursor", "../assets/images/cursor.png");
-
-    // Loading textures is long so you shouldn't make it in GameState
-    this->loadTexture("logo", "../assets/images/zombies.png");
-    this->loadTexture("human_walk_spritesheet", "../assets/images/human_walk_spritesheet.png");
-    this->loadTexture("human_die_spritesheet", "../assets/images/human_die_spritesheet.png");
-    this->loadTexture("male_zombie_walk_spritesheet", "../assets/images/zombie/male_walk_spritesheet.png");
-    this->loadTexture("male_zombie_die_spritesheet", "../assets/images/zombie/male_die_spritesheet.png");
-    this->loadTexture("female_zombie_walk_spritesheet", "../assets/images/zombie/female_walk_spritesheet.png");
-    this->loadTexture("female_zombie_die_spritesheet", "../assets/images/zombie/female_die_spritesheet.png");
+    this->loadTexture("spritesheet", "../assets/images/spritesheet.png");
     
     this->loadSound("punch", "../assets/sounds/punch.wav", 20.f);
     this->loadSound("dead_male_zombie", "../assets/sounds/dead_male_zombie.wav", 30.f);
@@ -29,12 +18,16 @@ MainMenuState::MainMenuState(sf::RenderWindow &p_window, std::stack<std::unique_
     this->openMusic("../assets/musics/background.wav");
     m_music.setLoop(true);
 
-    m_sprites.emplace("road", m_textures.at("road"));
-    m_sprites.emplace("logo", m_textures.at("logo"));
-    m_sprites.emplace("cursor", m_textures.at("cursor"));
+    m_sprites["road"].setTexture(m_textures.at("spritesheet"));
+    m_sprites.at("road").setTextureRect({ 8208, 0, 600, 700 });
 
-    m_sprites.at("logo").setPosition((m_window.getSize().x - m_sprites.at("logo").getGlobalBounds().width) / 2.f, 50.f);
+    m_sprites["cursor"].setTexture(m_textures.at("spritesheet"));
+    m_sprites.at("cursor").setTextureRect({ 8208, 700, 32, 32 });
     m_sprites.at("cursor").setColor(sf::Color::Red);
+
+    m_sprites["logo"].setTexture(m_textures.at("spritesheet"));
+    m_sprites.at("logo").setTextureRect({ 8208, 732, 300, 400 });
+    m_sprites.at("logo").setPosition((m_window.getSize().x - m_sprites.at("logo").getGlobalBounds().width) / 2.f, 50.f);
 
     this->createText("title", "CLICK TO PLAY", 0.f, 0.f, 20);
     m_texts.at("title").setPosition(

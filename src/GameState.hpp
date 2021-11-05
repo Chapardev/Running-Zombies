@@ -10,8 +10,8 @@
 class GameState : public State
 {
 private:
-    void _setEntityCharacteritics(int p_randomValue, std::string &p_walkPath, std::string &p_diePath, int &p_score);
-    void _createEntitySprites(const std::string &p_walkPath, const std::string &p_diePath);
+    void _setEntityCharacteritics(int p_randomValue, std::string &p_path, sf::IntRect &p_walkRect, sf::IntRect &p_dieRect, int &p_score);
+    void _createEntitySprites(const std::string &p_path, const sf::IntRect &p_walkRect, const sf::IntRect &p_dieRect);
     void _addEntity();
 
     // Removes entities who are dead or out of the screen
@@ -32,6 +32,7 @@ public:
 private:
     sf::Time m_apparitionTime { sf::seconds(1.f) };
     sf::Clock m_apparitionClock;
+    sf::Clock m_clock;
 
     float m_dt { 0.f };
     sf::Clock m_dtClock;

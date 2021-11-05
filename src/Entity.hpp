@@ -3,22 +3,29 @@
 
 #include "Animation.hpp"
 
+#include <memory>
+#include <map>
+
+template<typename T>
+using Dictionary = std::map<std::string, T>; 
+
 struct AnimatedSprite
 {
-    AnimatedSprite(sf::Sprite &p_sprite, float p_frameOffset, int p_numberOfFrames, bool p_loop=false)
-        : sprite { p_sprite }, frameOffset { p_frameOffset }, numberOfFrames { p_numberOfFrames }, loop { p_loop }, 
+    AnimatedSprite(sf::Sprite &p_sprite, const sf::IntRect &p_frameInfo, float p_frameOffset, int p_numberOfFrames, bool p_loop=false)
+        : sprite { p_sprite }, frameInfo { p_frameInfo }, frameOffset { p_frameOffset }, numberOfFrames { p_numberOfFrames }, loop { p_loop }, 
           animation { p_sprite, p_frameOffset, p_loop }
     {
         
     }   
 
     AnimatedSprite(const AnimatedSprite &p_other)
-        : AnimatedSprite { p_other.sprite, p_other.frameOffset, p_other.numberOfFrames, p_other.loop }
+        : AnimatedSprite { p_other.sprite, p_other.frameInfo, p_other.frameOffset, p_other.numberOfFrames, p_other.loop }
     {
         
     }
 
     sf::Sprite &sprite;
+    const sf::IntRect &frameInfo;
     float frameOffset;
     int numberOfFrames;
     bool loop;
@@ -31,11 +38,13 @@ private:
     void _addFrames(AnimatedSprite &p_sprite);
 
 public:
-    Entity(const sf::RenderWindow &p_window, const AnimatedSprite &p_spriteWalk, const AnimatedSprite &p_spriteDie, std::size_t p_id, int p_score);
+    Entity(const sf::RenderWindow &p_window, std::size_t p_id, int p_score);
+
+    void addAnimatedSprite(const std::string &p_keyName, const AnimatedSprite &p_sprite);
 
     bool isTargeted(float p_mousePosX, float p_mousePosY) const noexcept
     {
-        return m_walk.sprite.getGlobalBounds().contains(p_mousePosX, p_mousePosY);
+        return m_animatedSprites.at("walk")->sprite.getGlobalBounds().contains(p_mousePosX, p_mousePosY);
     }
 
     bool animationChanged() const noexcept
@@ -45,12 +54,13 @@ public:
 
     bool isDead() const noexcept
     {
-        return m_animationChanged && m_die.animation.isOver() && m_deathClock.getElapsedTime() > m_die.animation.getLength();
+        return m_animationChanged && m_animatedSprites.at("die")->animation.isOver() 
+            && m_deathClock.getElapsedTime() > m_animatedSprites.at("die")->animation.getLength();
     }
 
     bool isOutOfBounds() const noexcept
     {
-        return m_walk.sprite.getGlobalBounds().top > m_window.getSize().y;
+        return m_animatedSprites.at("walk")->sprite.getGlobalBounds().top > m_window.getSize().y;
     }
 
     int getScore() const noexcept { return m_score; }
@@ -64,8 +74,7 @@ public:
 protected:
     const sf::RenderWindow &m_window;
 
-    AnimatedSprite m_walk;
-    AnimatedSprite m_die;
+    Dictionary<std::unique_ptr<AnimatedSprite>> m_animatedSprites;
 
     // Enables to calculate time elapsed before corpse disappears
     sf::Clock m_deathClock;
