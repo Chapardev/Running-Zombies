@@ -22,7 +22,8 @@ void State::loadSound(const std::string &p_keyName, const std::string &p_fileNam
     {
         throw "Unable to load \"" + p_keyName + "\" sound (path: \"" + p_fileName + "\")";
     }
-    m_sounds[p_keyName].setBuffer(m_soundBuffers.at(p_keyName));
+
+    m_sounds.emplace(p_keyName, m_soundBuffers.at(p_keyName));
     m_sounds.at(p_keyName).setVolume(p_volume);
 }
 
@@ -34,11 +35,9 @@ void State::openMusic(const std::string &p_fileName)
     }
 }
 
-void State::createText(const std::string &p_keyName, const std::string &p_string, float p_x, float p_y, int p_size)
+void State::createText(const std::string &p_keyName, const std::string &p_string, float p_x, float p_y, unsigned int p_size)
 {
-    m_texts[p_keyName].setFont(m_font);
-    m_texts.at(p_keyName).setString(p_string);
-    m_texts.at(p_keyName).setCharacterSize(p_size);
+    m_texts.emplace(p_keyName, sf::Text { p_string, m_font, p_size });
     m_texts.at(p_keyName).setOutlineThickness(2.f);
     m_texts.at(p_keyName).setOutlineColor(sf::Color::Black);
     m_texts.at(p_keyName).setPosition(p_x, p_y);

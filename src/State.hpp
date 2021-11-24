@@ -19,7 +19,7 @@ protected:
     void loadFont(const std::string &p_fileName);
     void loadSound(const std::string &p_keyName, const std::string &p_fileName, float p_volume=100.f);
     void openMusic(const std::string &p_fileName);
-    void createText(const std::string &p_keyName, const std::string &p_string, float p_x, float p_y, int p_size=30);
+    void createText(const std::string &p_keyName, const std::string &p_string, float p_x, float p_y, unsigned int p_size=30u);
 
 public:
     State(sf::RenderWindow &p_window, std::stack<std::unique_ptr<State>> &p_states, sf::Font &p_font, Dictionary<sf::Text> &p_texts, 

@@ -2,6 +2,8 @@
 
 #include <effolkronium/random.hpp>
 
+using Random = effolkronium::random_static;
+
 void Entity::_addFrames(AnimatedSprite &p_sprite)
 {
     for (int i { 0 }; i < p_sprite.numberOfFrames; ++i)
@@ -12,8 +14,8 @@ void Entity::_addFrames(AnimatedSprite &p_sprite)
     }
 }
 
-Entity::Entity(const sf::RenderWindow &p_window, std::size_t p_id, int p_score)
-    : m_window { p_window }, m_id { p_id }, m_score { p_score }
+Entity::Entity(const sf::RenderWindow &p_window, const std::string &p_type, std::size_t p_id, int p_score, float p_speed)
+    : m_window { p_window }, m_type { p_type }, m_id { p_id }, m_score { p_score }, m_speed { p_speed }
 {
     
 }
@@ -24,13 +26,9 @@ void Entity::addAnimatedSprite(const std::string &p_keyName, const AnimatedSprit
 
     if (p_keyName == "walk")
     {
-        using Random = effolkronium::random_static;
         m_animatedSprites.at("walk")->sprite.setPosition(
-            Random::get<unsigned int>(
-                0u, 
-                m_window.getSize().x - m_animatedSprites.at("walk")->sprite.getGlobalBounds().width / m_animatedSprites.at("walk")->numberOfFrames
-            ),
-            -m_animatedSprites.at("walk")->sprite.getTextureRect().height * m_animatedSprites.at("walk")->sprite.getScale().y
+            Random::get<int>(0, m_window.getSize().x - m_animatedSprites.at("walk")->frameInfo.width),
+            -m_animatedSprites.at("walk")->frameInfo.height
         );
     }
 
